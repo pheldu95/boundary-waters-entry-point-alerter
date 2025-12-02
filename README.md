@@ -1,4 +1,7 @@
 https://entrypointalerter.app/
+# About
+The Boundary Wates has gotten very popular over the last few years. It can often be hard to get a permit for the area that you want to go to if you don't buy it early in the year. This web app will allow you to track entry point lakesx that you want to go to on a specific date. Once you are tracking one or more entry points, you will get an email when a permit becomes available.
+
 # To do:
 1. I don't like the name PermitWatch entity. Want to change it to TrackedEntryPoint.
 
