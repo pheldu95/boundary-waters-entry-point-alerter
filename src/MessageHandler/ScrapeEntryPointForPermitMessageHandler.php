@@ -6,6 +6,7 @@ use App\Services\SendPermitAlertEmail;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use App\Services\WebScrapingClient;
+use DateTimeImmutable;
 
 #[AsMessageHandler]
 class ScrapeEntryPointForPermitMessageHandler
@@ -23,17 +24,34 @@ class ScrapeEntryPointForPermitMessageHandler
             'timestamp' => date('Y-m-d H:i:s')
         ]);
 
-        //Just to see that it's working
-        dump('Handler processing: ' . $message->getPermitWatch()->getEntryPoint()->getName());
-        dump('Permit target date: ' . $message->getPermitWatch()->getTargetDate()->format('Y-m-d'));
+        $permitWatch = $message->getPermitWatch();
+        $targetDate = $permitWatch->getTargetDate();
+        $formattedTargetDate = $targetDate->format('Y-m-d\TH:i:s\Z');
 
-        //Todo: Use actual permit watch date in the url
+        //Just to see that it's working
+        // TODO: use the actual logger
+        dump('Handler processing: ' . $permitWatch->getEntryPoint()->getName());
+        dump('Permit target date: ' . $permitWatch->getTargetDate()->format('Y-m-d'));
+
         $webScrapingClient = new WebScrapingClient();
 
-        // commenting out for now so we aren't scraping their site too much during testing
-        // $result = $webScrapingClient;
-        // $result = $webScrapingClient->scrapeJson('https://www.recreation.gov/api/permits/233396/availability/month?start_date=2026-01-01T00:00:00.000Z&commercial_acct=false');
+        $firstOfMonth = $targetDate->modify('first day of this month midnight')->format('Y-m-d\TH:i:s.v\Z');
 
-        $this->sendPermitAlertEmail->sendPermitAlert($message->getPermitWatch());
+        $recreationDotGovUrl = "https://www.recreation.gov/api/permits/233396/availability/month?start_date=" . $firstOfMonth ."&commercial_acct=false";
+        
+        $result = $webScrapingClient->scrapeJson($recreationDotGovUrl);
+
+        $divisionId = $permitWatch->getEntryPoint()->getDivisionId();
+        $dateAvailability = $result['payload']['availability'][$divisionId]['date_availability'][$formattedTargetDate];
+
+        if($dateAvailability['remaining'] > 0)
+        {
+            dump('Permit available. Sending alert email to: ' . $permitWatch->getUser()->getEmail());
+            $this->sendPermitAlertEmail->sendPermitAlert($message->getPermitWatch());
+        }
+        else
+        {
+            dump('No permits available. End.');
+        }
     }
 }
