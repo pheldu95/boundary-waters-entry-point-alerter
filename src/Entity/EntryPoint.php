@@ -20,6 +20,9 @@ class EntryPoint
     #[ORM\Column]
     private ?string $number = null;
 
+    #[ORM\Column]
+    private ?int $divisionId = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -45,6 +48,18 @@ class EntryPoint
     public function setNumber(string $number): static
     {
         $this->number = $number;
+
+        return $this;
+    }
+
+    public function getDivisionId(): ?int
+    {
+        return $this->divisionId;
+    }
+
+    public function setDivisionId(int $divisionId): static
+    {
+        $this->divisionId = $divisionId;
 
         return $this;
     }
