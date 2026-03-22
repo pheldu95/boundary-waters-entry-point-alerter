@@ -2,6 +2,8 @@
 
 namespace App\Command;
 
+use App\Repository\EntryPointRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,8 +18,11 @@ class MapDivisionsToEntryPointsCommand extends Command
 {
     private string $projectDir;
 
-    public function __construct(string $projectDir)
-    {
+    public function __construct(
+        string $projectDir,
+        private EntryPointRepository $entryPointRepository,
+        private EntityManagerInterface $em,
+    ) {
         parent::__construct();
         $this->projectDir = $projectDir;
     }
@@ -38,7 +43,16 @@ class MapDivisionsToEntryPointsCommand extends Command
         }
 
         $divisionData = json_decode($jsonString, true);
-// var_dump($divisionData); die();
+
+        foreach ($divisionData['payload'] as $division) {
+            $entryPoint = $this->entryPointRepository->findOneBy(['number' => $division['code']]);
+            if (null !== $entryPoint) {
+                $entryPoint->setDivisionId($division['id']);
+                $this->em->persist($entryPoint);
+            }
+        }
+
+        $this->em->flush();
 
         $io->success('Finished adding division IDs to each EntryPoint');
 
