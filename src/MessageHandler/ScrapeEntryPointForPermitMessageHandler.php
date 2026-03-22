@@ -1,4 +1,5 @@
 <?php
+
 namespace App\MessageHandler;
 
 use App\Message\ScrapeEntryPointForPermitMessage;
@@ -13,14 +14,13 @@ class ScrapeEntryPointForPermitMessageHandler
 {
     public function __construct(
         private LoggerInterface $logger,
-        private SendPermitAlertEmail $sendPermitAlertEmail
+        private SendPermitAlertEmail $sendPermitAlertEmail,
     ) {}
 
     public function __invoke(ScrapeEntryPointForPermitMessage $message)
     {
-        $this->logger->info('ScrapeEntryPointForPermitMessage received!');
-        $this->logger->info('Message received!', [
-            'entryPoint' => $message->getPermitWatch()->getEntryPoint(),
+        $this->logger->info('ScrapeEntryPointForPermitMessage received!', [
+            'permitWatchId' => $message->getPermitWatch()->getId(),
             'timestamp' => date('Y-m-d H:i:s')
         ]);
 
@@ -30,28 +30,38 @@ class ScrapeEntryPointForPermitMessageHandler
 
         //Just to see that it's working
         // TODO: use the actual logger
-        dump('Handler processing: ' . $permitWatch->getEntryPoint()->getName());
-        dump('Permit target date: ' . $permitWatch->getTargetDate()->format('Y-m-d'));
+        $this->logger->info('Handler processing: ' . $permitWatch->getEntryPoint()->getName(), [
+            'permitWatchId' => $message->getPermitWatch()->getId(),
+            'timestamp' => date('Y-m-d H:i:s')
+        ]);
+        $this->logger->info('Permit target date: ' . $permitWatch->getTargetDate()->format('Y-m-d'), [
+            'permitWatchId' => $message->getPermitWatch()->getId(),
+            'timestamp' => date('Y-m-d H:i:s')
+        ]);
 
         $webScrapingClient = new WebScrapingClient();
 
         $firstOfMonth = $targetDate->modify('first day of this month midnight')->format('Y-m-d\TH:i:s.v\Z');
 
-        $recreationDotGovUrl = "https://www.recreation.gov/api/permits/233396/availability/month?start_date=" . $firstOfMonth ."&commercial_acct=false";
-        
+        $recreationDotGovUrl = "https://www.recreation.gov/api/permits/233396/availability/month?start_date=" . $firstOfMonth . "&commercial_acct=false";
+
         $result = $webScrapingClient->scrapeJson($recreationDotGovUrl);
 
         $divisionId = $permitWatch->getEntryPoint()->getDivisionId();
         $dateAvailability = $result['payload']['availability'][$divisionId]['date_availability'][$formattedTargetDate];
 
-        if($dateAvailability['remaining'] > 0)
-        {
-            dump('Permit available. Sending alert email to: ' . $permitWatch->getUser()->getEmail());
+        if ($dateAvailability['remaining'] > 0) {
+            $this->logger->notice('Permit available.' . $permitWatch->getUser()->getEmail(), [
+                'permitWatchId' => $message->getPermitWatch()->getId(),
+                'timestamp' => date('Y-m-d H:i:s')
+            ]);
+            
             $this->sendPermitAlertEmail->sendPermitAlert($message->getPermitWatch());
-        }
-        else
-        {
-            dump('No permits available. End.');
+        } else {
+            $this->logger->alert('No permits available. End.', [
+                'permitWatchId' => $message->getPermitWatch()->getId(),
+                'timestamp' => date('Y-m-d H:i:s')
+            ]);
         }
     }
 }

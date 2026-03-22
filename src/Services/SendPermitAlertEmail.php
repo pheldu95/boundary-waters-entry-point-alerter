@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use App\Entity\PermitWatch;
@@ -11,12 +12,9 @@ use Symfony\Component\Mime\Address;
 class SendPermitAlertEmail
 {
     public function __construct(
-        private MailerInterface $mailer, 
+        private MailerInterface $mailer,
         private ?LoggerInterface $logger = null
-    )
-    {
-        
-    }
+    ) {}
 
     /**
      * Send a permit alert email.
@@ -29,7 +27,10 @@ class SendPermitAlertEmail
     {
         $emailAddress = $permitWatch->getUser()->getEmail();
 
-        $this->logger->info('Sending permit alert email to ' . $emailAddress);
+        $this->logger->info('Sending permit alert email to ' . $emailAddress, [
+            'permitWatchId' => $permitWatch->getId(),
+            'timestamp' => date('Y-m-d H:i:s')
+        ]);
 
         $email = (new TemplatedEmail())
             ->from(new Address('alert@entry-point-alerter.com', 'Entry Point Alerter'))
@@ -40,9 +41,8 @@ class SendPermitAlertEmail
             ->context([
                 'entryPointName' => $permitWatch->getEntryPoint()->getName(),
                 'targetDate' => $permitWatch->getTargetDate()->format('Y-m-d')
-            ])
-        ;
-        
+            ]);
+
         try {
             $this->mailer->send($email);
         } catch (TransportExceptionInterface $e) {
@@ -52,7 +52,10 @@ class SendPermitAlertEmail
             return false;
         }
 
-        $this->logger->info('Sent permit alert email to ' . $emailAddress);
+        $this->logger->info('Sent permit alert email to ' . $emailAddress, [
+            'permitWatchId' => $permitWatch->getId(),
+            'timestamp' => date('Y-m-d H:i:s')
+        ]);
         return true;
     }
 }
