@@ -20,3 +20,5 @@
 ###< symfony/asset-mapper ###
 
 bolt.db
+
+/frankenphp/Caddyfile.bak

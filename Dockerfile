@@ -35,7 +35,7 @@ RUN set -eux; \
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # Transport to use by Mercure (default to Bolt)
-ENV MERCURE_EXTRA_DIRECTIVES="transport bolt://mercure.db"
+# ENV MERCURE_EXTRA_DIRECTIVES="transport bolt://mercure.db" DON'T THINK I NEED MERCURE AT ALL?
 
 ENV PHP_INI_SCAN_DIR=":$PHP_INI_DIR/app.conf.d"
 
