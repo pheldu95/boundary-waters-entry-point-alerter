@@ -42,7 +42,7 @@ class CheckMonitoredDatesCommand extends Command
         $monitoredDates = $this->monitoredDateRepository->findAll();
 
         foreach ($monitoredDates as $monitoredDate) {
-            $this->bus->dispatch(new ScrapeMonitoredDateMessage($monitoredDate));
+            $this->bus->dispatch(new ScrapeMonitoredDateMessage($monitoredDate->getId()));
         
             $io->info('Dispatching message for MonitoredDate ID: ' . $monitoredDate->getId());
         }
