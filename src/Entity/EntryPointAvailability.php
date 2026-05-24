@@ -7,6 +7,7 @@ use App\Repository\EntryPointAvailabilityRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: EntryPointAvailabilityRepository::class)]
+#[ORM\UniqueConstraint(fields: ['monitoredDate', 'entryPoint'])]
 #[ApiResource]
 class EntryPointAvailability
 {
