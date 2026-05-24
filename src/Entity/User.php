@@ -51,9 +51,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: PermitWatch::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $permitWatches;
 
+    /**
+     * @var Collection<int, MonitoredDate>
+     */
+    #[ORM\OneToMany(targetEntity: MonitoredDate::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $monitoredDates;
+
     public function __construct()
     {
         $this->permitWatches = new ArrayCollection();
+        $this->monitoredDates = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -173,6 +180,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($permitWatch->getUser() === $this) {
                 $permitWatch->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MonitoredDate>
+     */
+    public function getMonitoredDates(): Collection
+    {
+        return $this->monitoredDates;
+    }
+
+    public function addMonitoredDate(MonitoredDate $monitoredDate): static
+    {
+        if (!$this->monitoredDates->contains($monitoredDate)) {
+            $this->monitoredDates->add($monitoredDate);
+            $monitoredDate->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMonitoredDate(MonitoredDate $monitoredDate): static
+    {
+        if ($this->monitoredDates->removeElement($monitoredDate)) {
+            // set the owning side to null (unless already changed)
+            if ($monitoredDate->getUser() === $this) {
+                $monitoredDate->setUser(null);
             }
         }
 
