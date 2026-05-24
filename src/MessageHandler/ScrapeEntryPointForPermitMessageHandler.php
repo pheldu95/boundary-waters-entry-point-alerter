@@ -3,7 +3,7 @@
 namespace App\MessageHandler;
 
 use App\Message\ScrapeEntryPointForPermitMessage;
-use App\Services\SendPermitAlertEmail;
+use App\Services\SendAlertEmail;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use App\Services\WebScrapingClient;
@@ -14,7 +14,7 @@ class ScrapeEntryPointForPermitMessageHandler
 {
     public function __construct(
         private LoggerInterface $logger,
-        private SendPermitAlertEmail $sendPermitAlertEmail,
+        private SendAlertEmail $sendAlertEmail,
     ) {}
 
     public function __invoke(ScrapeEntryPointForPermitMessage $message)
@@ -56,7 +56,7 @@ class ScrapeEntryPointForPermitMessageHandler
                 'timestamp' => date('Y-m-d H:i:s')
             ]);
             
-            $this->sendPermitAlertEmail->sendPermitAlert($message->getPermitWatch());
+            $this->sendAlertEmail->sendPermitAlert($message->getPermitWatch());
         } else {
             $this->logger->alert('No permits available. End.', [
                 'permitWatchId' => $message->getPermitWatch()->getId(),
