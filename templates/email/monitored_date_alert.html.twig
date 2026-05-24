@@ -1,0 +1,29 @@
+{% apply inline_css %}
+<html>
+	<head>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+            }
+            a {
+                display: inline-block;
+                margin-top: 10px;
+                padding: 10px 15px;
+                background-color: #ffb900;
+                color: #151c27;
+                text-decoration: none;
+                border-radius: 5px;
+            }
+        </style>
+    </head>
+	<body>
+		<p>A permit has become available at
+			{{ entryPointName }}
+			for your target date of
+			{{ date }}.</p>
+		<a href="https://www.recreation.gov/permits/233396">Secure your permit!</a>
+	</body>
+</html>
+
+{% endapply %}

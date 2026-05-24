@@ -78,11 +78,11 @@ class SendAlertEmail
         ]);
 
         $email = (new TemplatedEmail())
-            ->from(new Address('alert@entry-point-alerter.com', 'Entry Point Alerter'))
+            ->from(new Address('phelps.duncan@gmail.com', 'Entry Point Alerter'))
             ->to($emailAddress)
             ->subject($entryPoint->getName() . ' Permit Available!')
-            ->htmlTemplate('/email/permit_alert.html.twig')
-            ->textTemplate('/email/permit_alert.txt.twig')
+            ->htmlTemplate('/email/monitored_date_alert.html.twig')
+            ->textTemplate('/email/monitored_date_alert.txt.twig')
             ->context([
                 'entryPointName' => $entryPoint->getName(),
                 'date' => $monitoredDate->getDate()->format('Y-m-d')
@@ -97,7 +97,7 @@ class SendAlertEmail
             return false;
         }
 
-        $this->logger->info('Sent permit alert email to ' . $emailAddress, [
+        $this->logger->info('Sent monitored date alert email to ' . $emailAddress, [
             'MonitoredDate id' => $monitoredDate->getId(),
             'timestamp' => date('Y-m-d H:i:s')
         ]);
