@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Pick a Date to Monitor{% endblock %}
+
+{% block body %}
+    <div class="max-w-sm mx-auto">
+        {% embed 'components/card/defaultCard.html.twig' %}
+            {% block card_content %}
+                {{ form_start(form) }}
+                    <div class="mt-8">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none" style="top: 28px;">
+                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            {{ form_row(form.date) }}
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        {{ form_row(form.submit) }}
+                    </div>
+                {{ form_end(form) }}
+            {% endblock %}
+        {% endembed %}
+    </div>
+{% endblock %}

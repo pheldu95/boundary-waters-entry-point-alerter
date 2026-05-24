@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+{% import "macros/button/defaultButton.html.twig" as defaultButton %}
+{% import "macros/button/deleteButton.html.twig" as deleteButton %}
+
+
+{% block title %}My Monitored Dates
+{% endblock %}
+
+{% block body %}
+	{% if monitoredDates|length > 0 %}
+		<h1 class="text-xl md:text-2xl text-white/90 leading-relaxed font-bold bg-clip-text leading-tight justify-center text-center mb-8">
+			My Monitored Dates
+		</h1>
+		<ul class="bg-white shadow-lg overflow-hidden sm:rounded-md max-w-sm mx-auto">
+			{% for monitoredDate in monitoredDates %}
+				<li class="border-t border-gray-200">
+					<div class="px-4 py-5 sm:px-6">
+						<div class="flex items-center justify-between">
+							<div>
+								<h3 class="text-lg leading-6 font-medium text-gray-900">
+									{{ monitoredDate.date|date('F j, Y') }}
+								</h3>
+							</div>
+							<div class="flex gap-1">
+								
+								<form action="{{ path('app_monitored_date_delete', {'id': monitoredDate.id})}}" method="post" class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white ps-1">
+									<input type="hidden" name="_token" value="{{ csrf_token('delete' ~ monitoredDate.id) }}">
+									{{ deleteButton.deleteButton('') }}
+								</form>
+							</div>
+						</div>
+					</div>
+				</li>
+			{% endfor %}
+		</ul>
+
+        <div class="shadow-lg overflow-hidden sm:rounded-md max-w-sm mx-auto pt-4">
+            <a href="{{ path('app_monitored_date_new') }}">
+                {{ defaultButton.defaultButton('', 'Add another!') }}
+            </a>
+        </div>
+	{% else %}
+		<h1 class="text-xl md:text-2xl text-white/90 leading-relaxed font-bold bg-clip-text leading-tight justify-center text-center">
+			You have no Monitored Dates.
+		</h1>
+		<div class="pt-4 justify-center flex">
+			<a href="{{ path('app_monitored_date_new') }}" class="bg-amber-400 hover:bg-amber-500 text-gray-900 font-bold text-xl px-8 py-4 rounded-lg shadow-lg hover:shadow-2xl hover:shadow-amber-400/60 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 inline-flex items-center space-x-2">
+				<span>Create a Monitored Date</span>
+				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+				</svg>
+			</a>
+		</div>
+	{% endif %}
+{% endblock %}
