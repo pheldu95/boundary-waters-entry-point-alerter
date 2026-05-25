@@ -28,7 +28,7 @@ class Schedule implements ScheduleProviderInterface
             ->add(
                 // RecurringMessage::cron('# * * * *', new RunCommandMessage('app:check-permit-watches')) //every hour
                 // RecurringMessage::cron('* * * * *', new RunCommandMessage('app:check-permit-watches')) //every minute
-                RecurringMessage::cron('# * * * *', new RunCommandMessage('app:check-monitored-dates')) //every hour
+                RecurringMessage::cron('0,30 * * * *', new RunCommandMessage('app:check-monitored-dates')) //every 30 min
             )        
         ;
     }
