@@ -58,7 +58,7 @@ class ScrapeMonitoredDateMessageHandler
         foreach($entryPoints as $entryPoint) {
             $divisionId = $entryPoint->getDivisionId();
             $availablePermitCount = $this->getAvailablePermitCount($divisionId, $scrapedData, $formattedTargetDate);
-            
+
             //see if EntryPointAvailibility exists yet for this date and entry point:
             $entryPointAvailability = $this->entryPointAvailabilityRepository->findOneBy([
                 'entryPoint' => $entryPoint,
@@ -77,18 +77,19 @@ class ScrapeMonitoredDateMessageHandler
                 $this->entityManager->persist($entryPointAvailability);
             }
 
-            if(
-                $entryPointAvailability->getAvailableCount() === 0
-                && $availablePermitCount > 0
-            ) {
-                $this->logger->info('Permits now available at ep ' . $entryPoint->getName() . ' on ' . $monitoredDate->getDate()->format('Y-m-d'));
-                $this->logger->info('There were ' . $entryPointAvailability->getAvailableCount() . ', ' . 'now there are ' . $availablePermitCount);
-
-                $entryPointAvailability->setAvailableCount($availablePermitCount);
+            if($entryPointAvailability->getAvailableCount() !== $availablePermitCount) {
+                if(
+                    $entryPointAvailability->getAvailableCount() === 0
+                    && $availablePermitCount > 0
+                ) {
+                    $this->logger->info('Permits now available at ep ' . $entryPoint->getName() . ' on ' . $monitoredDate->getDate()->format('Y-m-d'));
+                    $this->logger->info('There were ' . $entryPointAvailability->getAvailableCount() . ', ' . 'now there are ' . $availablePermitCount);
+                    
+                    //send alert
+                    $this->sendAlertEmail->sendMonitoredDateAlert($monitoredDate, $entryPoint);
+                }
                 
-                //send alert
-                $this->sendAlertEmail->sendMonitoredDateAlert($monitoredDate, $entryPoint);
-
+                $entryPointAvailability->setAvailableCount($availablePermitCount);
                 $this->entityManager->persist($entryPointAvailability);
             }
         }
@@ -104,7 +105,12 @@ class ScrapeMonitoredDateMessageHandler
     ): int
     {
         $dateAvailability = $scrapedData['payload']['availability'][$divisionId]['date_availability'][$formattedTargetDate];
-        
+
+        if ($dateAvailability === null) {
+            $this->logger->warning('No availability data found for entry point division id ' . $divisionId . ' on ' . $formattedTargetDate);
+            return 0;
+        }
+
         return $dateAvailability['remaining'];
     }
 }
