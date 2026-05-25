@@ -59,6 +59,8 @@ class ScrapeMonitoredDateMessageHandler
             $divisionId = $entryPoint->getDivisionId();
             $availablePermitCount = $this->getAvailablePermitCount($divisionId, $scrapedData, $formattedTargetDate);
 
+            $this->logger->info($availablePermitCount . ' permits available at ' . $entryPoint->getNumber() . ' ' . $entryPoint->getName());
+
             //see if EntryPointAvailibility exists yet for this date and entry point:
             $entryPointAvailability = $this->entryPointAvailabilityRepository->findOneBy([
                 'entryPoint' => $entryPoint,
@@ -77,6 +79,7 @@ class ScrapeMonitoredDateMessageHandler
                 $this->entityManager->persist($entryPointAvailability);
             }
 
+            $entryPointsThatNowHaveAvailablePermits = 0;
             if($entryPointAvailability->getAvailableCount() !== $availablePermitCount) {
                 if(
                     $entryPointAvailability->getAvailableCount() === 0
@@ -87,6 +90,7 @@ class ScrapeMonitoredDateMessageHandler
                     
                     //send alert
                     $this->sendAlertEmail->sendMonitoredDateAlert($monitoredDate, $entryPoint);
+                    $entryPointsThatNowHaveAvailablePermits++;
                 }
                 
                 $entryPointAvailability->setAvailableCount($availablePermitCount);
@@ -96,6 +100,10 @@ class ScrapeMonitoredDateMessageHandler
 
         $this->logger->info('Done checking entry points for this message');
         $this->entityManager->flush();
+
+        if ($entryPointsThatNowHaveAvailablePermits === 0) {
+            $this->logger->notice('No new permits available.');
+        }
     }
 
     private function getAvailablePermitCount(

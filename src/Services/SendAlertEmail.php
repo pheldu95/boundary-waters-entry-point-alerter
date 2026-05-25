@@ -85,6 +85,7 @@ class SendAlertEmail
             ->textTemplate('/email/monitored_date_alert.txt.twig')
             ->context([
                 'entryPointName' => $entryPoint->getName(),
+                'entryPointNumber' => $entryPoint->getNumber(),
                 'date' => $monitoredDate->getDate()->format('Y-m-d')
             ]);
 
